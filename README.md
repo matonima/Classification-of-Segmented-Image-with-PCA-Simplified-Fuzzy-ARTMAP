@@ -1,0 +1,1 @@
+# Classification-of-Segmented-Image-with-PCA-Simplified-Fuzzy-ARTMAP
