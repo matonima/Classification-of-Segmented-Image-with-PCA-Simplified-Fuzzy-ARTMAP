@@ -1,0 +1,33 @@
+clc;clear;
+imageFolder=('C:\...\Foldername);
+imds = imageDatastore(imageFolder);% dataset loaded as imds 
+%% segmentation
+for i=1:n %n=maximum number of images in the dataset
+ I=readimage(imds,i); %performs operation on 1 image at a time
+ [J]=JSEG(I,i); % modified JSEG that included glowing regions spatio 
+ temporal similarity
+end
+imagefolder2 = 'C:\...\segmented_data'; % segmented data storage folder
+imds_seg = imageDatastore(imagefolder2); %segmented data is made into a 
+dataset for further computation 
+%%Feature extraction 
+for i=1:m % m=maximum number of segments
+ I=readimage(imds_seg,i); %performs operation on 1 image at a time
+ IG=rgb2gray(I);IG=imresize(IG,[128 128]); 
+ [counts(:,i),binlocations(:,i)] = imhist(IG, 64); % histogram info 
+ % contrast, correlation, energy and homogeneity of image extracted for 
+ 4 different angles= [0 1],[-1 1],[-1 0] and [-1 -1]
+ glcms0(:,:,i)=graycomatrix(IG, 'offset',[0 1]); 
+ stats0 = graycoprops(glcms0(:,:,i));
+ STAT0(1,i)=stats0.Contrast;STAT0(2,i)=stats0.Correlation;
+ STAT0(3,i)=stats0.Energy;STAT0(4,i)=stats0.Homogeneity; 
+ 
+ % sobel filter edge and angle information
+ [BW(:,:,i),threshOut(i),Gy(:,:,i),Gx(:,:,i)] = edge(IG, 'Sobel',25);
+ G_mag(:,:,i)=sqrt((Gx(:,:,i).^2)+(Gy(:,:,i).^2));
+ G_angle(:,:,i)=atan((Gx(:,:,i))/(Gy(:,:,i)));
+ [counts_h(:,i),binloc_h(:,(i))] = imhist(G_angle(:,:,i), 24);
+end
+STAT=cat(1,STAT0,STAT1,STAT2,STAT3);
+Features=cat(1,STAT,counts,counts_h);% p-features by n-observation matrix
+Features2=Features';% n by p, observation by features
