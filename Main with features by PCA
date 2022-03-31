@@ -1,0 +1,12 @@
+data=Features2*Principal components; % reconstructed PCA
+data=data./max(data); % normalized
+ground_truth=gt_nature; % ground truth loaded for the 2nd module of SFAM
+%% create network
+net = create_network(size(data,2)); % [18] creates SFAM using the feature 
+no.
+net.vigilance = 0.6; %edit network components as needed
+net.alpha=0.8; net.beta = 1;
+t=train(data(1:123,:), ground_truth(1:123,:), net, 1000); %trains network
+class=classify(data(124:end,:), t, ground_truth(124:end,:), 1); %tests net
+fprintf(1,'Hit rate: %f\n', sum(class' == 
+ground_truth(124:end,:))*100/size(data(124:end,:),1)); % shows % accuracy
